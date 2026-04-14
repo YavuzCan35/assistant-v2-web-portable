@@ -22,6 +22,8 @@ Notes:
 - It also looks for `certs/cert.pem` and `certs/key.pem` in this folder for auto HTTPS.
 - Those cert files are intentionally not copied here because they should be generated per machine.
 - LM Studio is still an external dependency. It must be installed separately, running, and serving the model named in `.env`.
+- Python requirement for this bundle is `>= 3.10 and < 3.13`.
+- `setup.ps1` reuses a compatible local Python if found, otherwise it downloads and installs Python `3.12.10` from `python.org` automatically.
 
 ## First Use On A New PC
 
@@ -73,6 +75,9 @@ Start:
 ```
 
 What setup does:
+- checks for compatible Python `>= 3.10 and < 3.13`
+- downloads and installs Python `3.12.10` automatically if no compatible Python exists
+- recreates `.venv` if it was built with an incompatible Python version
 - creates `.venv` if missing
 - installs packages from `requirements.txt`
 - generates local `certs\cert.pem` and `certs\key.pem` if missing

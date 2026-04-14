@@ -10,8 +10,6 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.x509.oid import NameOID
 from dotenv import load_dotenv
 
-from assistant import KokoroTTS, FasterWhisperSTT, build_settings, resolve_whisper_device
-
 
 def collect_hostnames() -> list[str]:
     names: set[str] = {"localhost"}
@@ -119,6 +117,8 @@ def generate_local_cert(bundle_dir: Path, force: bool = False) -> None:
 
 
 def preload_models(bundle_dir: Path) -> None:
+    from assistant import KokoroTTS, FasterWhisperSTT, build_settings, resolve_whisper_device
+
     dotenv_path = bundle_dir / ".env"
     load_dotenv(dotenv_path=dotenv_path, override=True)
     settings = build_settings(
