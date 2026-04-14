@@ -1,0 +1,10 @@
+numpy>=1.26.0
+openai>=1.109.0
+faster-whisper>=1.1.0
+kokoro==0.9.4
+misaki==0.9.4
+python-dotenv>=1.0.1
+sounddevice>=0.5.1
+webrtcvad-wheels>=2.0.14
+pillow>=10.4.0
+cryptography>=43.0.0
