@@ -46,7 +46,7 @@ Notes:
 .\start.ps1
 ```
 
-7. Open the printed HTTPS LAN URL on the phone or another device on the same network.
+7. Wait until `LAN UI: https://<your-lan-ip>:8765` is printed in terminal, then open exactly that URL from the phone/device you want to use.
 8. If microphone permission is blocked, trust the generated local certificate on that device/browser.
 
 ## Optional Configuration
@@ -129,9 +129,15 @@ Startup and first-download behavior:
 - when the server starts correctly, terminal output includes both:
   - `Web UI: https://127.0.0.1:8765`
   - `LAN UI: https://<your-lan-ip>:8765`
+- from another device, use the `LAN UI` address (not `127.0.0.1`)
 - keep the terminal open while using the assistant
 - during first model download, do not stop the terminal; wait until setup/start finishes
 - if startup exits and you do not see `Web UI`/`LAN UI`, startup failed and should be retried
+
+Conversation behavior:
+- each device/browser keeps an ongoing conversation context
+- the assistant continues that same conversation until you press `New Round`
+- pressing `New Round` resets the conversation history for that client
 
 About the Hugging Face symlink warning:
 - this warning is about Windows symlink support in cache folders

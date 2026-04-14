@@ -611,6 +611,45 @@ def guess_lan_ip() -> str:
 
 class WebAssistantRuntime:
     def __init__(self, no_tts: bool) -> None:
+        boot_total = 7
+        boot_start = time.perf_counter()
+
+        def boot(step: int, message: str) -> None:
+            pct = max(0, min(100, int((step / boot_total) * 100)))
+            width = 20
+            filled = int((pct / 100.0) * width)
+            bar = "#" * filled + "-" * (width - filled)
+            elapsed = time.perf_counter() - boot_start
+            print(f"[boot] [{bar}] {pct:3d}% {message} (t={elapsed:.1f}s)", flush=True)
+
+        def run_with_boot_heartbeat(step: int, message: str, init_fn):
+            boot(step, message)
+            stop_event = threading.Event()
+
+            def heartbeat() -> None:
+                tick = 0
+                while not stop_event.wait(2.0):
+                    tick += 1
+                    dots = "." * ((tick % 3) + 1)
+                    pct = max(0, min(100, int((step / boot_total) * 100)))
+                    width = 20
+                    filled = int((pct / 100.0) * width)
+                    bar = "#" * filled + "-" * (width - filled)
+                    elapsed = time.perf_counter() - boot_start
+                    print(
+                        f"[boot] [{bar}] {pct:3d}% {message}{dots} (still working, t={elapsed:.1f}s)",
+                        flush=True,
+                    )
+
+            thread = threading.Thread(target=heartbeat, daemon=True)
+            thread.start()
+            try:
+                return init_fn()
+            finally:
+                stop_event.set()
+                thread.join(timeout=0.1)
+
+        boot(0, "Loading .env and startup settings")
         dotenv_path = Path(__file__).with_name(".env")
         load_dotenv(dotenv_path=dotenv_path, override=True)
         self.settings = build_settings(
@@ -621,6 +660,7 @@ class WebAssistantRuntime:
         )
         # Keep v2 web STT pinned to large-v3; LLM model still comes from LM_STUDIO_MODEL in .env.
         self.settings.whisper_model = "large-v3"
+        boot(1, "Settings loaded")
 
         print(
             f"Web STT backend: faster-whisper model={self.settings.whisper_model} "
@@ -629,14 +669,20 @@ class WebAssistantRuntime:
         print(f"Web LLM model: {self.settings.lm_model}")
         print(f"LM Studio endpoint: {self.settings.lm_base_url}")
 
-        self.stt = FasterWhisperSTT(
-            model_name=self.settings.whisper_model,
-            device=self.settings.whisper_device,
-            compute_type=self.settings.whisper_compute_type,
-            language=self.settings.whisper_language,
-            initial_prompt=self.settings.whisper_initial_prompt,
-            preprocess=self.settings.stt_preprocess,
+        self.stt = run_with_boot_heartbeat(
+            2,
+            "Initializing STT (may download on first run)",
+            lambda: FasterWhisperSTT(
+                model_name=self.settings.whisper_model,
+                device=self.settings.whisper_device,
+                compute_type=self.settings.whisper_compute_type,
+                language=self.settings.whisper_language,
+                initial_prompt=self.settings.whisper_initial_prompt,
+                preprocess=self.settings.stt_preprocess,
+            ),
         )
+        boot(3, "STT ready")
+        boot(4, "Initializing LLM client")
         self.llm = LMStudioChat(
             self.settings.lm_base_url,
             self.settings.lm_model,
@@ -648,15 +694,19 @@ class WebAssistantRuntime:
         if not self.settings.no_tts:
             output_device = resolve_output_device(self.settings.output_device_name)
             self.output_device = output_device
-            self.tts = KokoroTTS(
-                repo_id=self.settings.kokoro_repo_id,
-                lang_code=self.settings.kokoro_lang_code,
-                voice=self.settings.kokoro_voice,
-                speed=self.settings.kokoro_speed,
-                split_pattern=self.settings.kokoro_split_pattern,
-                device=resolve_whisper_device(self.settings.whisper_device),
-                output_device=output_device,
-                simple_playback=self.settings.tts_simple_playback,
+            self.tts = run_with_boot_heartbeat(
+                5,
+                "Initializing TTS backend (may download on first run)",
+                lambda: KokoroTTS(
+                    repo_id=self.settings.kokoro_repo_id,
+                    lang_code=self.settings.kokoro_lang_code,
+                    voice=self.settings.kokoro_voice,
+                    speed=self.settings.kokoro_speed,
+                    split_pattern=self.settings.kokoro_split_pattern,
+                    device=resolve_whisper_device(self.settings.whisper_device),
+                    output_device=output_device,
+                    simple_playback=self.settings.tts_simple_playback,
+                ),
             )
             print(
                 f"Web TTS enabled: voice={self.settings.kokoro_voice} "
@@ -664,13 +714,16 @@ class WebAssistantRuntime:
             )
         else:
             print("Web TTS disabled (--no-tts).")
+            boot(5, "TTS disabled by flag")
 
         self.lock = threading.Lock()
         self.client_states: dict[str, ClientConversationState] = {}
         self.active_whisper_language = ""
         self.active_kokoro_lang_code = ""
+        boot(6, "Applying default language profile")
         # Web default profile: Whisper English + Kokoro American English.
         self._apply_language_profile("en", "a")
+        boot(7, "Startup complete")
 
     def _new_client_state(self) -> ClientConversationState:
         return ClientConversationState(

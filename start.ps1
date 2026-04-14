@@ -13,6 +13,18 @@ $certPath = Join-Path $scriptDir "certs\cert.pem"
 $keyPath = Join-Path $scriptDir "certs\key.pem"
 $cacheRoot = Join-Path $scriptDir ".cache"
 
+function Get-LanIPv4 {
+    try {
+        $udp = New-Object System.Net.Sockets.UdpClient
+        $udp.Connect("8.8.8.8", 80)
+        $ip = $udp.Client.LocalEndPoint.Address.ToString()
+        $udp.Close()
+        return $ip
+    } catch {
+        return ""
+    }
+}
+
 function Set-ProjectRuntimeEnvironment {
     $hfHome = Join-Path $cacheRoot "huggingface"
     $hfHubCache = Join-Path $hfHome "hub"
@@ -29,6 +41,8 @@ function Set-ProjectRuntimeEnvironment {
     $env:HUGGINGFACE_HUB_CACHE = $hfHubCache
     $env:TRANSFORMERS_CACHE = $hfHubCache
     $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
+    $env:HF_HUB_DISABLE_XET = "1"
+    $env:HF_HUB_VERBOSITY = "error"
     $env:TORCH_HOME = $torchHome
     $env:PIP_CACHE_DIR = $pipCacheDir
 }
@@ -47,6 +61,11 @@ if (-not ((Test-Path $certPath) -and (Test-Path $keyPath))) {
 
 Write-Host "[start] Make sure LM Studio is running and the model in .env is loaded."
 Write-Host "[start] Local cache root: $cacheRoot"
+Write-Host "[start] Browser URL: https://127.0.0.1:$Port"
+$lanIp = Get-LanIPv4
+if ($lanIp) {
+    Write-Host "[start] Phone URL:   https://${lanIp}:$Port"
+}
 Write-Host "[start] Launching web server..."
 Write-Host "[start] Keep this terminal open while using the assistant."
 
