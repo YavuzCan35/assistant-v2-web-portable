@@ -206,8 +206,8 @@ PAGE_HTML = """<!doctype html>
           New Round
         </button>
         <div id="imageStatus">No image queued</div>
-        <label id="langWrap" title="Applies to both Whisper and Kokoro">
-          Language
+        <label id="langWrap" title="Speech language for both Whisper STT and Kokoro TTS">
+          Speech Language
           <select id="langSelect">
             <option value="en:a" selected>English</option>
             <option value="tr:tr">Turkish</option>
