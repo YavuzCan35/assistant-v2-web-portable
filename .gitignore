@@ -2,6 +2,7 @@ __pycache__/
 .venv/
 .venv-*/
 .env
+.cache/
 output/
 certs/cert.pem
 certs/key.pem

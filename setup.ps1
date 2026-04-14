@@ -15,6 +15,28 @@ $envFile = Join-Path $scriptDir ".env"
 $envExampleFile = Join-Path $scriptDir ".env.example"
 $requirements = Join-Path $scriptDir "requirements.txt"
 $setupHelper = Join-Path $scriptDir "setup_runtime.py"
+$cacheRoot = Join-Path $scriptDir ".cache"
+
+function Set-ProjectRuntimeEnvironment {
+    $hfHome = Join-Path $cacheRoot "huggingface"
+    $hfHubCache = Join-Path $hfHome "hub"
+    $torchHome = Join-Path $cacheRoot "torch"
+    $pipCacheDir = Join-Path $cacheRoot "pip"
+
+    foreach ($path in @($cacheRoot, $hfHome, $hfHubCache, $torchHome, $pipCacheDir)) {
+        New-Item -ItemType Directory -Force -Path $path | Out-Null
+    }
+
+    $env:XDG_CACHE_HOME = $cacheRoot
+    $env:HF_HOME = $hfHome
+    $env:HF_HUB_CACHE = $hfHubCache
+    $env:HUGGINGFACE_HUB_CACHE = $hfHubCache
+    $env:TRANSFORMERS_CACHE = $hfHubCache
+    $env:TORCH_HOME = $torchHome
+    $env:PIP_CACHE_DIR = $pipCacheDir
+}
+
+Set-ProjectRuntimeEnvironment
 
 function Get-PythonCandidates {
     $candidates = New-Object System.Collections.Generic.List[object]
@@ -253,6 +275,7 @@ Write-Host ""
 Write-Host "[setup] Complete."
 Write-Host "[setup] Next run command: .\start.ps1"
 Write-Host "[setup] Python requirement: $PythonRequirementText"
+Write-Host "[setup] Local cache root: $cacheRoot"
 Write-Host "[setup] Phone/browser note:"
 Write-Host "  1. Open the HTTPS URL printed by start.ps1."
 Write-Host "  2. If microphone permission is blocked, trust the generated local certificate on that device."

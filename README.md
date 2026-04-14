@@ -21,6 +21,7 @@ Notes:
 - `setup.ps1` creates local `.env` from `.env.example` if `.env` is missing.
 - It also looks for `certs/cert.pem` and `certs/key.pem` in this folder for auto HTTPS.
 - Those cert files are intentionally not copied here because they should be generated per machine.
+- Package/model downloads are stored in this bundle's local `.cache` folder so they can be removed safely.
 - LM Studio is still an external dependency. It must be installed separately, running, and serving the model named in `.env`.
 - Python requirement for this bundle is `>= 3.10 and < 3.13`.
 - `setup.ps1` reuses a compatible local Python if found, otherwise it downloads and installs Python `3.12.10` from `python.org` automatically.
@@ -80,8 +81,42 @@ What setup does:
 - recreates `.venv` if it was built with an incompatible Python version
 - creates `.venv` if missing
 - installs packages from `requirements.txt`
+- stores package/model caches under local `.cache`
 - generates local `certs\cert.pem` and `certs\key.pem` if missing
 - optionally preloads Whisper and Kokoro downloads
+
+Uninstall:
+
+```powershell
+.\uninstall.ps1
+```
+
+What uninstall removes:
+- `.venv`
+- `.env`
+- `.cache`
+- `output`
+- generated `certs\cert.pem` and `certs\key.pem`
+- local `__pycache__`
+- temporary Python installer download under `%TEMP%\assistant-v2-web-portable-bootstrap`
+
+What uninstall does not remove:
+- LM Studio
+- any globally installed Python
+- caches outside this bundle folder
+
+Optional uninstall flags:
+- keep `.env`:
+
+```powershell
+.\uninstall.ps1 -KeepEnvFile
+```
+
+- keep generated HTTPS cert/key:
+
+```powershell
+.\uninstall.ps1 -KeepCerts
+```
 
 Phone/browser HTTPS note:
 - mobile microphone permission usually requires HTTPS
