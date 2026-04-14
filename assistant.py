@@ -347,13 +347,13 @@ class LMStudioChat:
 
         reasoning = normalize_text(str(getattr(message, "reasoning_content", "") or ""))
         finish_reason = normalize_text(str(choice.finish_reason or "")).lower()
-        if finish_reason == "length":
-            current = self.max_tokens if (self.max_tokens and self.max_tokens > 0) else 0
+        if finish_reason == "length" and self.max_tokens is not None and self.max_tokens > 0:
+            current = self.max_tokens
             retry_max_tokens = min(max(current * 3, 180), 640)
             if retry_max_tokens > current:
                 print(
                     f"[LLM warning] Empty content at token limit "
-                    f"({current if current > 0 else 'auto'}); retrying with {retry_max_tokens}."
+                    f"({current}); retrying with {retry_max_tokens}."
                 )
                 retry_response = self._request(
                     messages,
@@ -1312,7 +1312,10 @@ def main() -> int:
             f"LLM max tokens: "
             f"{settings.lm_max_tokens if settings.lm_max_tokens is not None else 'unlimited'}"
         )
-        print(f"TTS max chars: {settings.tts_max_chars}")
+        print(
+            f"TTS max chars: "
+            f"{settings.tts_max_chars if settings.tts_max_chars > 0 else 'unlimited'}"
+        )
         print(
             f"TTS playback sample rate: {tts.output_sample_rate} Hz "
             f"(pipeline {tts.pipeline_sample_rate} Hz)"
