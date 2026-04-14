@@ -28,6 +28,7 @@ function Set-ProjectRuntimeEnvironment {
     $env:HF_HUB_CACHE = $hfHubCache
     $env:HUGGINGFACE_HUB_CACHE = $hfHubCache
     $env:TRANSFORMERS_CACHE = $hfHubCache
+    $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
     $env:TORCH_HOME = $torchHome
     $env:PIP_CACHE_DIR = $pipCacheDir
 }
@@ -46,6 +47,8 @@ if (-not ((Test-Path $certPath) -and (Test-Path $keyPath))) {
 
 Write-Host "[start] Make sure LM Studio is running and the model in .env is loaded."
 Write-Host "[start] Local cache root: $cacheRoot"
+Write-Host "[start] Launching web server..."
+Write-Host "[start] Keep this terminal open while using the assistant."
 
 $args = @($appScript, "--host", $ListenHost, "--port", "$Port")
 if ($NoTts) {
@@ -53,4 +56,9 @@ if ($NoTts) {
 }
 
 & $venvPython @args
-exit $LASTEXITCODE
+$exitCode = $LASTEXITCODE
+if ($exitCode -ne 0) {
+    Write-Host "[start] Server exited with code $exitCode."
+    Write-Host "[start] If no 'Web UI:' / 'LAN UI:' lines were printed, startup did not complete."
+}
+exit $exitCode

@@ -32,6 +32,7 @@ function Set-ProjectRuntimeEnvironment {
     $env:HF_HUB_CACHE = $hfHubCache
     $env:HUGGINGFACE_HUB_CACHE = $hfHubCache
     $env:TRANSFORMERS_CACHE = $hfHubCache
+    $env:HF_HUB_DISABLE_SYMLINKS_WARNING = "1"
     $env:TORCH_HOME = $torchHome
     $env:PIP_CACHE_DIR = $pipCacheDir
 }

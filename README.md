@@ -124,3 +124,16 @@ Phone/browser HTTPS note:
 - you may need to trust that cert on the phone/browser before microphone access works
 - Android usually accepts this after installing/trusting the cert
 - iPhone/iPad may require enabling full trust after installing the cert
+
+Startup and first-download behavior:
+- when the server starts correctly, terminal output includes both:
+  - `Web UI: https://127.0.0.1:8765`
+  - `LAN UI: https://<your-lan-ip>:8765`
+- keep the terminal open while using the assistant
+- during first model download, do not stop the terminal; wait until setup/start finishes
+- if startup exits and you do not see `Web UI`/`LAN UI`, startup failed and should be retried
+
+About the Hugging Face symlink warning:
+- this warning is about Windows symlink support in cache folders
+- it is usually non-fatal; download still works, but cache may use more disk
+- this bundle disables that warning by default in setup/start scripts
