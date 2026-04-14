@@ -1,5 +1,5 @@
 param(
-    [string]$Host = "0.0.0.0",
+    [string]$ListenHost = "0.0.0.0",
     [int]$Port = 8765,
     [switch]$NoTts
 )
@@ -47,7 +47,7 @@ if (-not ((Test-Path $certPath) -and (Test-Path $keyPath))) {
 Write-Host "[start] Make sure LM Studio is running and the model in .env is loaded."
 Write-Host "[start] Local cache root: $cacheRoot"
 
-$args = @($appScript, "--host", $Host, "--port", "$Port")
+$args = @($appScript, "--host", $ListenHost, "--port", "$Port")
 if ($NoTts) {
     $args += "--no-tts"
 }
