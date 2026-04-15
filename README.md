@@ -146,14 +146,12 @@ About the Hugging Face symlink warning:
 
 ## LM Studio Model Settings (Screenshots)
 
-Place these four screenshots in `docs/model-settings/` with the exact filenames below:
+Screenshots used for this setup:
 
 - `01-model-info.png`
 - `02-context-and-offload.png`
 - `03-inference-settings.png`
 - `04-server-settings.png`
-
-Then they render in README like this:
 
 ![Model Info](docs/model-settings/01-model-info.png)
 ![Context and Offload](docs/model-settings/02-context-and-offload.png)
