@@ -143,3 +143,19 @@ About the Hugging Face symlink warning:
 - this warning is about Windows symlink support in cache folders
 - it is usually non-fatal; download still works, but cache may use more disk
 - this bundle disables that warning by default in setup/start scripts
+
+## LM Studio Model Settings (Screenshots)
+
+Place these four screenshots in `docs/model-settings/` with the exact filenames below:
+
+- `01-model-info.png`
+- `02-context-and-offload.png`
+- `03-inference-settings.png`
+- `04-server-settings.png`
+
+Then they render in README like this:
+
+![Model Info](docs/model-settings/01-model-info.png)
+![Context and Offload](docs/model-settings/02-context-and-offload.png)
+![Inference Settings](docs/model-settings/03-inference-settings.png)
+![Server Settings](docs/model-settings/04-server-settings.png)
